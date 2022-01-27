@@ -1,42 +1,78 @@
 let storedValue = 0;
-let displayValue = "";
+let displayValue = 0;
 let storedOperator = "";
 let result = 0;
-
-let displayToBeCleared = false;
+let displayToBeEmptied = true;
+let zeroError = false;
+const zeroErrorMsg = "No no no";
 
 const displayWindow = document.getElementById("display");
 
 // Value of button clicked gets put on display.
 // Stores the displayed value.
 function toDisplay(e) {
-    if(displayToBeCleared == true) {
-        displayWindow.value = "";
-        displayToBeCleared = false;
+    if(displayToBeEmptied == true) {
+        emptyDisplay();
+    }
+    
+
+    // Displays error
+    if(zeroError == true) {
+        displayZeroErrorMsg();
+
+        return;
     }
 
-    if(typeof e == "string" ||
-       typeof e == "number") {
+    // Displays the result
+    else if(typeof e == "number") {
         displayWindow.value = e;
         displayValue = e;
+        console.log("one");
     }
+    // Appends new number to display number
     else {
         displayWindow.value += e.target.textContent;
         displayValue = displayWindow.value;
+        console.log("two");
     }
+
+    console.log("out");
 }
+
+
 
 // Stores the operator when pressed.
 function storeOp(e) {
-    storedValue = displayValue;
-    storedOperator = e.target.value;
-    displayValue = "";
-    displayToBeCleared = true;
+    // On error
+    if(zeroError == true) {
+        return;
+    }
+    // On empty stored variable.
+    else if(storedValue == 0) {
+        storedValue = displayValue;
+        storedOperator = e.target.value;
+        displayToBeEmptied = true;
+    }
+    
+    // Operating
+    else {
+        operate();
+        storedValue = displayValue;
+        storedOperator = e.target.value;
+        displayValue = "";
+        displayToBeEmptied = true;
+    }
+
+    
 }
 
 // Evaluates expression and displays it.
 function operate() {
     console.log(storedValue + " " + storedOperator + " " + displayValue);
+
+    if(zeroError == true) {
+        return;
+    }
 
     switch (storedOperator) {
         case "add":
@@ -49,19 +85,49 @@ function operate() {
             result = Number(storedValue) * Number(displayValue);
             break;
         case "div":
-            result = (Number(storedValue)*(1.0)) / Number(displayValue);
-            break;
+            if(displayValue == 0) {
+                // result = zeroErrorMsg;
+                zeroError = true;
+                break;
+            }
+            else {
+                result = (Number(storedValue)*(1.0)) / Number(displayValue);
+                break;
+            }
+            
     }
 
-    // storedValue = displayValue;
+    storedValue = 0;
     toDisplay(result);
-    displayToBeCleared = true;
+    displayToBeEmptied = true;
 }
 
-function clearDisplay() {
-    displayWindow.value = "";
-    displayValue = 0;
+// Empties the display and clears the data.
+function clearData() {
+    zeroError = false;
+    zeroDisplay();
+    storedValue = 0;
+    storedOperator = "";
 }
+
+// Displays the zero error message.
+function displayZeroErrorMsg() {
+    displayWindow.value = zeroErrorMsg;
+    displayValue = zeroErrorMsg;
+}
+
+// Places only a zero in the display window.
+function zeroDisplay() {
+    displayWindow.value = 0;
+    displayToBeEmptied = true;
+}
+
+// Clears the display window.
+function emptyDisplay() {
+    displayWindow.value = "";
+    displayToBeEmptied = false;
+}
+
 
 // Adds event listeners for all numbers when clicked.
 const numbers = Array.from(document.querySelectorAll(".num"));
@@ -77,4 +143,4 @@ equals.addEventListener("click", operate);
 
 
 // Adds an event listener for the clear button.
-document.getElementById("clear").addEventListener("click", clearDisplay);
+document.getElementById("clear").addEventListener("click", clearData);
