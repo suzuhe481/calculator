@@ -36,6 +36,8 @@ function toDisplay(e) {
             displayWindow.value = e;
             displayValue = e;
         }
+        // Clears depressed operations button.
+        operations.forEach(op => op.style.backgroundColor = "");
     }
 
     // Displays decimal point.
@@ -61,10 +63,13 @@ function toDisplay(e) {
 
 // Stores the operator when pressed.
 function storeOp(e) {
+    changeOpColor(e);
+
     // On error
     if(zeroError == true) {
         return;
     }
+    
     // On empty stored variable.
     else if(storedValue == 0) {
         // Keyboard press
@@ -159,6 +164,7 @@ function clearData() {
     result = 0;
     storedOperator = "";
     decimalExists == false;
+    operations.forEach(op => op.style.backgroundColor = "");
 }
 
 // Displays the zero error message.
@@ -204,31 +210,6 @@ function plusMinus() {
     displayValue = displayWindow.value;
 }
 
-// Event listeners to add numbers to display.
-const numbers = Array.from(document.querySelectorAll(".num"));
-numbers.forEach(num => num.addEventListener("click", toDisplay));
-
-// Event listener for operations.
-const operations = Array.from(document.querySelectorAll(".op"));
-operations.forEach(op => op.addEventListener("click", storeOp));
-
-// Event listener for equals.
-document.getElementById("equals").addEventListener("click", operate);
-
-// Event listener for clear button.
-document.getElementById("clear").addEventListener("click", clearData);
-
-// Event listener for decimal button.
-document.getElementById("decimal").addEventListener("click", addDecimal);
-
-document.getElementById("plus-minus").addEventListener("click", plusMinus);
-
-// Event listener for solar panel text opacity.
-document.getElementById("solar-panel").addEventListener("mouseover", lowerOpacity);
-document.getElementById("solar-panel").addEventListener("mouseout", resetOpacity);
-
-// Detects when a keyboard number is pressed.
-window.addEventListener("keydown", inputKey);
 
 function inputKey(e) {
     let keyValue = e.key;
@@ -273,3 +254,35 @@ function inputKey(e) {
         return;
     }
 }
+
+// Changes the color of the current operations button.
+function changeOpColor(e) {
+    operations.forEach(op => op.style.backgroundColor = "");
+    e.target.style.backgroundColor = "rgb(156, 155, 155)";
+}
+
+// Event listeners to add numbers to display.
+const numbers = Array.from(document.querySelectorAll(".num"));
+numbers.forEach(num => num.addEventListener("click", toDisplay));
+
+// Event listener for operations.
+const operations = Array.from(document.querySelectorAll(".op"));
+operations.forEach(op => op.addEventListener("click", storeOp));
+
+// Event listener for equals.
+document.getElementById("equals").addEventListener("click", operate);
+
+// Event listener for clear button.
+document.getElementById("clear").addEventListener("click", clearData);
+
+// Event listener for decimal button.
+document.getElementById("decimal").addEventListener("click", addDecimal);
+
+document.getElementById("plus-minus").addEventListener("click", plusMinus);
+
+// Event listener for solar panel text opacity.
+document.getElementById("solar-panel").addEventListener("mouseover", lowerOpacity);
+document.getElementById("solar-panel").addEventListener("mouseout", resetOpacity);
+
+// Detects when a keyboard number is pressed.
+window.addEventListener("keydown", inputKey);
