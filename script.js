@@ -27,15 +27,9 @@ function toDisplay(e) {
     
     // Displays result
     else if(typeof e == "number") {
-        // Checks if whole number or decimal.
-        if(e % 1 != 0) {
-            displayWindow.value = e;
-            displayValue = e;
-        }
-        else {
-            displayWindow.value = e;
-            displayValue = e;
-        }
+        displayWindow.value = e;
+        displayValue = e;
+        
         // Clears depressed operations button.
         operations.forEach(op => op.style.backgroundColor = "");
     }
@@ -46,13 +40,13 @@ function toDisplay(e) {
         displayValue = e;
     }
 
-    // If on screen button is pressed.
+    // If on screen button is pressed, number appended to end.
     else if(typeof e == "object") {
         displayWindow.value += e.target.textContent;
         displayValue = displayWindow.value;
     }
     
-    // If parameter is sent.
+    // If parameter is sent, number appended to end.
     else {
         displayWindow.value += e;
         displayValue = displayWindow.value;
@@ -63,8 +57,6 @@ function toDisplay(e) {
 
 // Stores the operator when pressed.
 function storeOp(e) {
-    changeOpColor(e);
-
     // On error
     if(zeroError == true) {
         return;
@@ -82,12 +74,15 @@ function storeOp(e) {
             storedValue = displayValue;
             storedOperator = e.target.value;
             displayToBeEmptied = true;
+            changeOpColor(e);
         }
-        
+
+        decimalExists = false;
     }
     
     // Operating without pressing equals.
-    else {
+    // Eg. 3 * 5 + 2 / 3 * 12 ...
+    else  {
         if(typeof e == "string") {
             operate();
             storedValue = displayValue;
@@ -111,12 +106,11 @@ function operate() {
         return;
     }
 
-    console.log(storedValue + " " + storedOperator + " " + displayValue);
-
     if(zeroError == true) {
         return;
     }
 
+    // Calculates result based on operator.
     switch (storedOperator) {
         case "add":
         case "+":
@@ -157,14 +151,14 @@ function operate() {
 
 // Empties the display and clears data.
 function clearData() {
-    zeroError = false;
-    zeroDisplay();
     storedValue = 0;
     displayValue = 0;
-    result = 0;
     storedOperator = "";
-    decimalExists == false;
+    result = 0;
+    zeroError = false;
+    decimalExists = false;
     operations.forEach(op => op.style.backgroundColor = "");
+    zeroDisplay();
 }
 
 // Displays the zero error message.
@@ -217,37 +211,50 @@ function inputKey(e) {
     // Regular expression to check for the 4 characters of + - * / .
     const opsRegex = /[\+\-\*\/]/g;
     
-    // Regulat expressoin to check for the character of "." 
+    // Regular expression to check for the character of "." 
     const decimalRegex = /[.]/g;
 
     // If number key is pressed.
     if(/\d/.test(keyValue)) {
         toDisplay(keyValue);
+        changeKeyColor(e);
     }
 
     // If operation key is pressed.
     else if(opsRegex.test(keyValue)) {
         storeOp(keyValue);
+        changeOpColor(e);
     }
 
     // If decimal key is pressed.
     else if(decimalRegex.test(keyValue)) {
         addDecimal();
+        changeKeyColor(e);
     }
 
     // If Enter key is pressed.
     else if(keyValue == "Enter") {
         operate();
+        changeKeyColor("equals");
     }
 
     // If Delete or Backspace key is pressed.
-    else if(keyValue == "Delete" || keyValue == "Backspace") {
+    else if(keyValue == "Delete" ||
+            keyValue == "Escape") {
         clearData();
+        changeKeyColor("clear");
     }
 
     // If , is pressed.
     else if(keyValue == ",") {
         plusMinus();
+        changeKeyColor("plus-minus");
+    }
+
+    // If backspace is pressed.
+    else if(keyValue == "Backspace") {
+        backspace();
+        changeKeyColor("backspace");
     }
 
     else {
@@ -257,9 +264,86 @@ function inputKey(e) {
 
 // Changes the color of the current operations button.
 function changeOpColor(e) {
+    // Clears currently pressed operations.
     operations.forEach(op => op.style.backgroundColor = "");
-    e.target.style.backgroundColor = "rgb(156, 155, 155)";
+
+    // If keyboard button is pressed.
+    if(e.type == "keydown") {
+        let opButton;
+
+        switch (e.key) {
+            case "+":
+                opButton = document.getElementById("add");
+                break;
+            case "-":
+                opButton = document.getElementById("sub");
+                break;
+            case "*":
+                opButton = document.getElementById("mul");
+                break;
+            case "/":
+                opButton = document.getElementById("div");
+                break;
+        }
+
+        opButton.style.backgroundColor = "rgb(156, 155, 155)";
+    }
+    // If on screen button is pressed.
+    else {
+        operations.forEach(op => op.style.backgroundColor = "");
+        e.target.style.backgroundColor = "rgb(156, 155, 155)";
+    }
 }
+
+// Changes button colors when using keyboard.
+function changeKeyColor(e) {
+    if(e == "equals") {
+        let element = document.getElementById("equals");
+        element.style.backgroundColor = "rgb(156, 155, 155)";
+    }
+    else if(e == "clear") {
+        let element = document.getElementById("clear");
+        element.style.backgroundColor = "rgb(156, 155, 155)";
+    }
+    else if(e.key == ".") {
+        let element = document.getElementById("decimal");
+        element.style.backgroundColor = "rgb(156, 155, 155)";
+    }
+    else if(e == "plus-minus") {
+        let element = document.getElementById(e);
+        element.style.backgroundColor = "rgb(156, 155, 155)";
+    }
+    else if(e == "backspace") {
+        let element = document.getElementById(e);
+        element.style.backgroundColor = "rgb(156, 155, 155)";
+    }
+    else {
+        let element = document.getElementById(e.key);
+        element.style.backgroundColor = "rgb(156, 155, 155)";
+    }
+}
+
+// Deletes the last number in the display.
+function backspace() {
+    // If going to delete the final digit of display..
+    if(displayValue.length == 1) {
+        zeroDisplay();
+    }
+    // If a result was just outputted, disable backspace.
+    else if(typeof displayValue == "number") {
+        return;
+    }
+    // Deletes last digit on display..
+    else {
+        let numMinusLast = displayValue.slice(0, -1);
+
+        displayToBeEmptied = true;
+        toDisplay(numMinusLast);
+    }
+
+}
+    
+
 
 // Event listeners to add numbers to display.
 const numbers = Array.from(document.querySelectorAll(".num"));
@@ -284,5 +368,66 @@ document.getElementById("plus-minus").addEventListener("click", plusMinus);
 document.getElementById("solar-panel").addEventListener("mouseover", lowerOpacity);
 document.getElementById("solar-panel").addEventListener("mouseout", resetOpacity);
 
-// Detects when a keyboard number is pressed.
+document.getElementById("backspace").addEventListener("click", backspace);;
+
+// Event listener when a keyboard number is pressed.
 window.addEventListener("keydown", inputKey);
+
+// Event listener when a key is raised.
+window.addEventListener("keyup", resetKeyColor);
+
+
+// Resets button colors back to default when using keyboard.
+function resetKeyColor(e) {
+    // let elementValue = e.key;
+    // console.log("e is: " + e);
+    // console.log("e.key is: " + e.key);
+
+    // Regular expression to check for the character of "." 
+    const decimalRegex = /[.]/g;
+    
+    // If number key is raised.
+    if(/\d/.test(e.key)) {
+        let element = document.getElementById(e.key);
+        // console.log(element.style.backgroundColor);
+        element.style.backgroundColor = "";
+    }
+
+    // If decimal key is raised.
+    else if(decimalRegex.test(e)) {
+        let element = document.getElementById("decimal");
+        element.style.backgroundColor = "";
+    }
+
+    // If Enter key is raised.
+    else if(e.key == "Enter") {
+        let element = document.getElementById("equals");
+        element.style.backgroundColor = "";
+    }
+
+    // If Delete or Escape key is raised.
+    else if(e.key == "Delete" ||
+            e.key == "Escape") {
+        let element = document.getElementById("clear");
+        element.style.backgroundColor = "";
+    }
+
+    // If comma(+/-) key is raised.
+    else if(e.key == ",") {
+        let element = document.getElementById("plus-minus");
+        element.style.backgroundColor = "";
+    }
+
+    // If Backspace is raised.
+    else if(e.key == "Backspace") {
+        let element = document.getElementById("backspace");
+        element.style.backgroundColor = "";
+    }
+
+    else {
+        return;
+    }
+    
+}
+
+

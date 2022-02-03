@@ -25,10 +25,10 @@
 
 #buttons > * {
     height: 40px;
-    width: 40px;
+    width: 42px;
 }
 
-#equals, #clear {
+#equals {
     height: 40px;
-    width: 85px;
+    width: 87px;
 }
