@@ -4,13 +4,21 @@ let storedOperator = "";
 let result = 0;
 let displayToBeEmptied = true;
 let zeroError = false;
-const zeroErrorMsg = "No no no";
 let decimalExists = false;
+
+const zeroErrorMsg = "Can't do that.";
+const buttonClickColor = buttonClickColor;
 
 const displayWindow = document.getElementById("display");
 
-// Value of button clicked gets put on display.
-// Stores the displayed value.
+/*
+Description: Takes in a parameter to display.
+@Param: A single parameter.
+    -If number: Will replace and display on display.
+    -If decimal: Will append a decimal to display content. 
+    -If an object: Mouse object. Will append number clicked to display.
+    -If string: From key event. Will append number key pressed to display.
+*/
 function toDisplay(e) {
     // If display needs to be emptied.
     if(displayToBeEmptied == true) {
@@ -42,20 +50,35 @@ function toDisplay(e) {
 
     // If on screen button is pressed, number appended to end.
     else if(typeof e == "object") {
-        displayWindow.value += e.target.textContent;
+        // console.log(e);
+        let num = e.target.textContent;
+
+        displayWindow.value += num;
         displayValue = displayWindow.value;
     }
     
     // If parameter is sent, number appended to end.
-    else {
-        displayWindow.value += e;
+    else if (typeof e == "string") {
+        // console.log(typeof e);
+        // console.log(e);
+        let num = e;
+
+        displayWindow.value += num;
         displayValue = displayWindow.value;
+    }
+    else {
+        // Nothing
     }
 }
 
 
-
-// Stores the operator when pressed.
+/*
+Description: Stores the operator selected. Will also call operate() 
+if multiple operators are selected.
+@Param: A single parameter.
+    If string - Keyboard press. Stores appropriate operator.
+    Others - Button pressed. Stores appropriaet operator.
+*/
 function storeOp(e) {
     // On error
     if(zeroError == true) {
@@ -64,43 +87,47 @@ function storeOp(e) {
     
     // On empty stored variable.
     else if(storedValue == 0) {
-        // Keyboard press
+        storedValue = displayValue;
+        // Keyboard press.
         if(typeof e == "string") {
-            storedValue = displayValue;
             storedOperator = e;
-            displayToBeEmptied = true;
         }
+        // On screen button press.
         else {
-            storedValue = displayValue;
             storedOperator = e.target.value;
-            displayToBeEmptied = true;
             changeOpColor(e);
         }
 
+        displayToBeEmptied = true;
         decimalExists = false;
     }
     
     // Operating without pressing equals.
     // Eg. 3 * 5 + 2 / 3 * 12 ...
     else  {
+        operate();
+        storedValue = displayValue;
+
+        // Keyboard press.
         if(typeof e == "string") {
-            operate();
-            storedValue = displayValue;
             storedOperator = e;
-            displayValue = "";
-            displayToBeEmptied = true;
         }
+        // On screen button press.
         else {
-            operate();
-            storedValue = displayValue;
             storedOperator = e.target.value;
-            displayValue = "";
-            displayToBeEmptied = true;
         }
+
+        displayValue = "";
+        displayToBeEmptied = true;
     }
 }
 
-// Evaluates expression and displays it.
+
+/*
+Description: Takes the storedValue, the storedOperator, and 
+the displayValue and performs the operation on them.
+Calls toDisplay() to display the results.
+*/
 function operate() {
     if(storedValue == 0) {
         return;
@@ -112,19 +139,15 @@ function operate() {
 
     // Calculates result based on operator.
     switch (storedOperator) {
-        case "add":
         case "+":
             result = Number(storedValue) + Number(displayValue);
             break;
-        case "sub":
         case "-":
             result = Number(storedValue) - Number(displayValue);
             break;
-        case "mul":
         case "*":
             result = Number(storedValue) * Number(displayValue);
             break;
-        case "div":
         case "/":
             if(displayValue == 0) {
                 zeroError = true;
@@ -143,13 +166,18 @@ function operate() {
         result = parseFloat(result.toFixed(8));
     }
     
+    // Displays result and resets variables to get ready 
+    // for next operation.
     storedValue = 0;
     toDisplay(result);
     displayToBeEmptied = true;
     decimalExists = false;
 }
 
-// Empties the display and clears data.
+
+/*
+Description: Empties the display, clears stored data, resets colors.
+*/
 function clearData() {
     storedValue = 0;
     displayValue = 0;
@@ -161,25 +189,37 @@ function clearData() {
     zeroDisplay();
 }
 
-// Displays the zero error message.
+
+/*
+Description: Displays teh zero error message.
+*/
 function displayZeroErrorMsg() {
     displayWindow.value = zeroErrorMsg;
     displayValue = zeroErrorMsg;
 }
 
-// Places only a zero in the display window.
+
+/*
+Description: Places only a zero in the display window.
+*/
 function zeroDisplay() {
     displayWindow.value = 0;
     displayToBeEmptied = true;
 }
 
-// Clears the display window.
+
+/*
+Description: Clears the display window.
+*/
 function emptyDisplay() {
     displayWindow.value = "";
     displayToBeEmptied = false;
 }
 
-// Adds a decimal, unless one is already on screen.
+
+/*
+Description: Adds a decimal, unless one is already on screen.
+*/
 function addDecimal() {
     if(decimalExists == true) {
         return;
@@ -190,7 +230,10 @@ function addDecimal() {
     }
 }
 
-// Lowers or resets opacity of display text when mouse hovers over solar panel.
+
+/*
+Description: Lowers or resets opacity of display text when mouse hovers over solar panel.
+*/
 function lowerOpacity() {
     displayWindow.style.color = "rgba(0, 0, 0, 0.4)";
 }
@@ -198,13 +241,21 @@ function resetOpacity() {
     displayWindow.style.color = "rgba(0, 0, 0, 1)";
 }
 
-// Changes the display value from positive to negative and the reverse.
+
+/*
+Description: Changes the display value from positive to negative and the reverse.
+*/
 function plusMinus() {
     displayWindow.value = (-1)*(displayWindow.value);
     displayValue = displayWindow.value;
 }
 
 
+/*
+Description: Performs on operation depending on which keyboard 
+key was pressed.
+@Param: Keyboard event.
+*/
 function inputKey(e) {
     let keyValue = e.key;
 
@@ -262,7 +313,11 @@ function inputKey(e) {
     }
 }
 
-// Changes the color of the current operations button.
+
+/*
+Description: Changes the color of the operations button selected.
+@Param: The keyboard event or the onscreen button clicked.
+*/
 function changeOpColor(e) {
     // Clears currently pressed operations.
     operations.forEach(op => op.style.backgroundColor = "");
@@ -286,44 +341,51 @@ function changeOpColor(e) {
                 break;
         }
 
-        opButton.style.backgroundColor = "rgb(156, 155, 155)";
+        opButton.style.backgroundColor = buttonClickColor;
     }
     // If on screen button is pressed.
     else {
         operations.forEach(op => op.style.backgroundColor = "");
-        e.target.style.backgroundColor = "rgb(156, 155, 155)";
+        e.target.style.backgroundColor = buttonClickColor;
     }
 }
 
-// Changes button colors when using keyboard.
+
+/*
+Description: Changes button colors when using keyboard.
+@Param: The keyboard event.
+*/
 function changeKeyColor(e) {
     if(e == "equals") {
         let element = document.getElementById("equals");
-        element.style.backgroundColor = "rgb(156, 155, 155)";
+        element.style.backgroundColor = buttonClickColor;
     }
     else if(e == "clear") {
         let element = document.getElementById("clear");
-        element.style.backgroundColor = "rgb(156, 155, 155)";
+        element.style.backgroundColor = buttonClickColor;
     }
     else if(e.key == ".") {
         let element = document.getElementById("decimal");
-        element.style.backgroundColor = "rgb(156, 155, 155)";
+        element.style.backgroundColor = buttonClickColor;
     }
     else if(e == "plus-minus") {
         let element = document.getElementById(e);
-        element.style.backgroundColor = "rgb(156, 155, 155)";
+        element.style.backgroundColor = buttonClickColor;
     }
     else if(e == "backspace") {
         let element = document.getElementById(e);
-        element.style.backgroundColor = "rgb(156, 155, 155)";
+        element.style.backgroundColor = buttonClickColor;
     }
     else {
         let element = document.getElementById(e.key);
-        element.style.backgroundColor = "rgb(156, 155, 155)";
+        element.style.backgroundColor = buttonClickColor;
     }
 }
 
-// Deletes the last number in the display.
+
+/*
+Description: Deletes the last number in the display.
+*/
 function backspace() {
     // If going to delete the final digit of display..
     if(displayValue.length == 1) {
@@ -344,52 +406,17 @@ function backspace() {
 }
     
 
-
-// Event listeners to add numbers to display.
-const numbers = Array.from(document.querySelectorAll(".num"));
-numbers.forEach(num => num.addEventListener("click", toDisplay));
-
-// Event listener for operations.
-const operations = Array.from(document.querySelectorAll(".op"));
-operations.forEach(op => op.addEventListener("click", storeOp));
-
-// Event listener for equals.
-document.getElementById("equals").addEventListener("click", operate);
-
-// Event listener for clear button.
-document.getElementById("clear").addEventListener("click", clearData);
-
-// Event listener for decimal button.
-document.getElementById("decimal").addEventListener("click", addDecimal);
-
-document.getElementById("plus-minus").addEventListener("click", plusMinus);
-
-// Event listener for solar panel text opacity.
-document.getElementById("solar-panel").addEventListener("mouseover", lowerOpacity);
-document.getElementById("solar-panel").addEventListener("mouseout", resetOpacity);
-
-document.getElementById("backspace").addEventListener("click", backspace);;
-
-// Event listener when a keyboard number is pressed.
-window.addEventListener("keydown", inputKey);
-
-// Event listener when a key is raised.
-window.addEventListener("keyup", resetKeyColor);
-
-
-// Resets button colors back to default when using keyboard.
+/*
+Description: Resets button colors back to default when using keyboard.
+@Param: Keyboard event.
+*/
 function resetKeyColor(e) {
-    // let elementValue = e.key;
-    // console.log("e is: " + e);
-    // console.log("e.key is: " + e.key);
-
     // Regular expression to check for the character of "." 
     const decimalRegex = /[.]/g;
     
     // If number key is raised.
     if(/\d/.test(e.key)) {
         let element = document.getElementById(e.key);
-        // console.log(element.style.backgroundColor);
         element.style.backgroundColor = "";
     }
 
@@ -431,3 +458,30 @@ function resetKeyColor(e) {
 }
 
 
+// Event listeners.
+// Listens to onscreen number buttons.
+const numbers = Array.from(document.querySelectorAll(".num"));
+numbers.forEach(num => num.addEventListener("click", toDisplay));
+
+// Listens to onscreen operation buttons.
+const operations = Array.from(document.querySelectorAll(".op"));
+operations.forEach(op => op.addEventListener("click", storeOp));
+
+// Listens to onscreen equals button.
+document.getElementById("echangeOpColorecimal").addEventListener("click", addDecimal);
+
+// Listens to onscreen onscreen plus/minus button,
+document.getElementById("plus-minus").addEventListener("click", plusMinus);
+
+// Listens to onscreen backspace button.
+document.getElementById("backspace").addEventListener("click", backspace);;
+
+// Listens to keyboard keys when pressed.
+window.addEventListener("keydown", inputKey);
+
+// Listens to when a keyboard key is raised.
+window.addEventListener("keyup", resetKeyColor);
+
+// Event listener for solar panel text opacity.
+document.getElementById("solar-panel").addEventListener("mouseover", lowerOpacity);
+document.getElementById("solar-panel").addEventListener("mouseout", resetOpacity);
