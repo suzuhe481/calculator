@@ -7,7 +7,7 @@ let zeroError = false;
 let decimalExists = false;
 
 const zeroErrorMsg = "Can't do that.";
-const buttonClickColor = buttonClickColor;
+const buttonClickColor = "rgb(156, 155, 155)";
 
 const displayWindow = document.getElementById("display");
 
@@ -32,8 +32,7 @@ function toDisplay(e) {
         return;
     }
 
-    
-    // Displays result
+    // Displays result.
     else if(typeof e == "number") {
         displayWindow.value = e;
         displayValue = e;
@@ -50,8 +49,16 @@ function toDisplay(e) {
 
     // If on screen button is pressed, number appended to end.
     else if(typeof e == "object") {
-        // console.log(e);
         let num = e.target.textContent;
+        
+        // Prevents multiple 0s from being displayed.
+        if(displayValue == 0 && num == 0) {
+            displayWindow.value = 0;
+            displayValue = 0;
+            displayToBeEmptied = true;
+        
+            return;
+        }
 
         displayWindow.value += num;
         displayValue = displayWindow.value;
@@ -59,9 +66,16 @@ function toDisplay(e) {
     
     // If parameter is sent, number appended to end.
     else if (typeof e == "string") {
-        // console.log(typeof e);
-        // console.log(e);
         let num = e;
+        
+        // Prevents multiple 0s from being displayed.
+        if(displayValue == 0 && num == 0) {
+            displayWindow.value = 0;
+            displayValue = 0;
+            displayToBeEmptied = true;
+
+            return;
+        }
 
         displayWindow.value += num;
         displayValue = displayWindow.value;
@@ -88,6 +102,7 @@ function storeOp(e) {
     // On empty stored variable.
     else if(storedValue == 0) {
         storedValue = displayValue;
+
         // Keyboard press.
         if(typeof e == "string") {
             storedOperator = e;
@@ -191,7 +206,7 @@ function clearData() {
 
 
 /*
-Description: Displays teh zero error message.
+Description: Displays the zero error message.
 */
 function displayZeroErrorMsg() {
     displayWindow.value = zeroErrorMsg;
@@ -468,7 +483,13 @@ const operations = Array.from(document.querySelectorAll(".op"));
 operations.forEach(op => op.addEventListener("click", storeOp));
 
 // Listens to onscreen equals button.
-document.getElementById("echangeOpColorecimal").addEventListener("click", addDecimal);
+document.getElementById("equals").addEventListener("click", operate);
+
+// Listens to onscreen clear button.
+document.getElementById("clear").addEventListener("click", clearData);
+
+// Listens to onscreen decimal button.
+document.getElementById("decimal").addEventListener("click", addDecimal);
 
 // Listens to onscreen onscreen plus/minus button,
 document.getElementById("plus-minus").addEventListener("click", plusMinus);
